@@ -11,7 +11,7 @@ import tqdm
 from .config import Config
 from .dataset import FakeNewsDataset
 from .model import FakeNewsModel
-from .utils import seed_everything, calculate_auc, FGM
+from .utils import seed_everything, calculate_auc, PGD
 
 
 # def train_fn(model, train_loader, optimizer, scheduler, device, criterion, fgm=None):
@@ -145,12 +145,12 @@ def run():
         criterion = nn.BCEWithLogitsLoss()
 
         # 初始化对抗训练
-        fgm = FGM(model) if conf.USE_FGM else None
+        pgd = PGD(model) if conf.USE_PGD else None
 
         best_auc = 0
 
         for epoch in range(conf.EPOCHS):
-            avg_loss = train_fn(model, train_loader, optimizer, scheduler, conf.DEVICE, criterion, fgm)
+            avg_loss = train_fn(model, train_loader, optimizer, scheduler, conf.DEVICE, criterion, pgd)
             preds, targets = eval_fn(model, valid_loader, conf.DEVICE)
             auc_score = calculate_auc(targets, preds)
 
