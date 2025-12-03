@@ -14,9 +14,42 @@ from .model import FakeNewsModel
 from .utils import seed_everything, calculate_auc, FGM
 
 
-def train_fn(model, train_loader, optimizer, scheduler, device, criterion, fgm=None):
+# def train_fn(model, train_loader, optimizer, scheduler, device, criterion, fgm=None):
+#     model.train()
+#     losses = []
+#
+#     for data in tqdm.tqdm(train_loader, desc="Training"):
+#         ids = data['ids'].to(device)
+#         mask = data['mask'].to(device)
+#         token_type_ids = data['token_type_ids'].to(device)
+#         labels = data['labels'].to(device).view(-1, 1)
+#
+#         optimizer.zero_grad()
+#         outputs = model(ids, mask, token_type_ids)
+#         loss = criterion(outputs, labels)
+#         loss.backward()
+#
+#         # 对抗训练
+#         if fgm is not None:
+#             fgm.attack()  # 攻击
+#             outputs_adv = model(ids, mask, token_type_ids)
+#             loss_adv = criterion(outputs_adv, labels)
+#             loss_adv.backward()
+#             fgm.restore()  # 恢复
+#
+#         optimizer.step()
+#         scheduler.step()
+#         losses.append(loss.item())
+#
+#     return np.mean(losses)
+
+
+def train_fn(model, train_loader, optimizer, scheduler, device, criterion, pgd_attacker):
     model.train()
     losses = []
+
+    # PGD 参数设置
+    K = 3  # 攻击次数
 
     for data in tqdm.tqdm(train_loader, desc="Training"):
         ids = data['ids'].to(device)
@@ -24,21 +57,36 @@ def train_fn(model, train_loader, optimizer, scheduler, device, criterion, fgm=N
         token_type_ids = data['token_type_ids'].to(device)
         labels = data['labels'].to(device).view(-1, 1)
 
-        optimizer.zero_grad()
+        # 1. 正常前向传播
         outputs = model(ids, mask, token_type_ids)
         loss = criterion(outputs, labels)
-        loss.backward()
+        loss.backward()  # 计算原始梯度
 
-        # 对抗训练
-        if fgm is not None:
-            fgm.attack()  # 攻击
-            outputs_adv = model(ids, mask, token_type_ids)
-            loss_adv = criterion(outputs_adv, labels)
-            loss_adv.backward()
-            fgm.restore()  # 恢复
+        # 2. PGD 对抗训练逻辑
+        if pgd_attacker is not None:
+            pgd_attacker.backup_grad()  # 备份原始梯度
 
+            # 进行 K 次对抗攻击
+            for t in range(K):
+                # 在 embedding 上添加扰动，is_first_attack 只有第一次为 True
+                pgd_attacker.attack(is_first_attack=(t == 0))
+
+                # 如果不是最后一步，需要清空梯度计算新的扰动方向
+                if t != K - 1:
+                    model.zero_grad()
+                else:
+                    pgd_attacker.restore_grad()  # 最后一步恢复正常的梯度用于累加
+
+                outputs_adv = model(ids, mask, token_type_ids)
+                loss_adv = criterion(outputs_adv, labels)
+                loss_adv.backward()  # 反向传播对抗梯度
+
+            pgd_attacker.restore()  # 恢复原始 embedding 参数
+
+        # 3. 参数更新
         optimizer.step()
         scheduler.step()
+        optimizer.zero_grad()
         losses.append(loss.item())
 
     return np.mean(losses)
