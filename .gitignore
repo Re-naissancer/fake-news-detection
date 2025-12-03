@@ -1,0 +1,22 @@
+# 忽略 PyTorch 训练生成的权重文件
+output/*.pth
+output/*.pt
+
+# 忽略临时文件和日志
+output/
+result/
+log/
+__pycache__/
+
+# Python 虚拟环境
+venv/
+.venv/
+conda_env/
+
+# IDE/系统文件
+.DS_Store
+*.swp
+
+# HuggingFace 下载的本地模型权重
+# 如果您将模型下载到本地，请忽略整个文件夹
+pretrained_models/
