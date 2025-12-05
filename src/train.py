@@ -14,36 +14,6 @@ from .model import FakeNewsModel
 from .utils import seed_everything, calculate_auc, PGD
 
 
-# def train_fn(model, train_loader, optimizer, scheduler, device, criterion, fgm=None):
-#     model.train()
-#     losses = []
-#
-#     for data in tqdm.tqdm(train_loader, desc="Training"):
-#         ids = data['ids'].to(device)
-#         mask = data['mask'].to(device)
-#         token_type_ids = data['token_type_ids'].to(device)
-#         labels = data['labels'].to(device).view(-1, 1)
-#
-#         optimizer.zero_grad()
-#         outputs = model(ids, mask, token_type_ids)
-#         loss = criterion(outputs, labels)
-#         loss.backward()
-#
-#         # 对抗训练
-#         if fgm is not None:
-#             fgm.attack()  # 攻击
-#             outputs_adv = model(ids, mask, token_type_ids)
-#             loss_adv = criterion(outputs_adv, labels)
-#             loss_adv.backward()
-#             fgm.restore()  # 恢复
-#
-#         optimizer.step()
-#         scheduler.step()
-#         losses.append(loss.item())
-#
-#     return np.mean(losses)
-
-
 def train_fn(model, train_loader, optimizer, scheduler, device, criterion, pgd_attacker):
     model.train()
     losses = []

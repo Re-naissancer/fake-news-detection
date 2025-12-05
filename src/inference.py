@@ -38,7 +38,6 @@ def inference():
         trained_folds += 1
 
         model = FakeNewsModel(conf)
-        model_path = f"{conf.OUTPUT_DIR}/bert_lstm_fold{fold}.pth"
         model.load_state_dict(torch.load(model_path, map_location=conf.DEVICE))
         model.to(conf.DEVICE)
         model.eval()
@@ -63,31 +62,8 @@ def inference():
         return
 
 
-    # # 遍历所有Fold的模型进行预测集成
-    # for fold in range(conf.N_FOLDS):
-    #     print(f"Inference using Fold {fold + 1} model...")
-    #     model = FakeNewsModel(conf)
-    #     model_path = f"{conf.OUTPUT_DIR}/bert_lstm_fold{fold}.pth"
-    #     model.load_state_dict(torch.load(model_path, map_location=conf.DEVICE))
-    #     model.to(conf.DEVICE)
-    #     model.eval()
-    #
-    #     fold_preds = []
-    #     with torch.no_grad():
-    #         for data in tqdm(test_loader):
-    #             ids = data['ids'].to(conf.DEVICE)
-    #             mask = data['mask'].to(conf.DEVICE)
-    #             token_type_ids = data['token_type_ids'].to(conf.DEVICE)
-    #
-    #             outputs = model(ids, mask, token_type_ids)
-    #             outputs = torch.sigmoid(outputs)  # 转为概率
-    #             fold_preds.extend(outputs.cpu().numpy())
-    #
-    #     # 将当前fold的预测结果加到总结果中
-    #     final_preds += np.array(fold_preds)
-
     # 取平均
-    final_preds /= conf.N_FOLDS
+    final_preds /= trained_folds
     final_preds = final_preds.flatten()
 
     # 生成提交文件

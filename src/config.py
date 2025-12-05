@@ -33,7 +33,6 @@ class Config:
 
     # 进阶参数
     N_FOLDS = 5  # 5折交叉验证
-    #USE_FGM = True  # 是否使用对抗训练
     USE_PGD = True  # 开启 PGD 对抗训练
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

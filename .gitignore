@@ -20,3 +20,8 @@ conda_env/
 # HuggingFace 下载的本地模型权重
 # 如果您将模型下载到本地，请忽略整个文件夹
 pretrained_models/
+
+# 忽略JetBrains编辑器（PyCharm/IntelliJ）的配置文件
+.idea/
+# 可选：补充其他IDE的忽略规则（比如VS Code）
+.vscode/
