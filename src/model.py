@@ -15,18 +15,18 @@ class FakeNewsModel(nn.Module):
         hidden_size = self.bert.config.hidden_size
 
         # 增加一个BiLSTM层来捕捉长距离依赖
-        self.lstm = nn.LSTM(hidden_size, hidden_size, batch_first=True, bidirectional=True)
+        self.lstm = nn.LSTM(hidden_size, hidden_size // 2, batch_first=True, bidirectional=True)
 
         # 注意力层
         self.attention = nn.Sequential(
-            nn.Linear(hidden_size * 2, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
             nn.Tanh(),
             nn.Linear(hidden_size, 1)
         )
 
         # 分类层
         self.classifier = nn.Sequential(
-            nn.Linear(hidden_size * 2, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
             nn.Dropout(0.3),
             nn.Linear(hidden_size, 1)
