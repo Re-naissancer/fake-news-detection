@@ -15,17 +15,14 @@ class Config:
     SUB_FILE = os.path.join(RESULT_DIR, 'submission.csv')
 
     # 模型参数
-    # 如果没有本地下载模型，改为 'hfl/chinese-roberta-wwm-ext' 让huggingface自动下载
     BERT_PATH = os.path.join(MODEL_DIR, 'chinese-macbert-large')
     # BERT_PATH = 'hfl/chinese-macbert-large'
-    NUM_CLASSES = 1
 
     # 训练超参数
     SEED = 42
-    MAX_LEN = 256  # 微博文本一般较短，但加上截断，192通常足够
-    BATCH_SIZE = 32  # 根据显存调整，8G显存建议16，16G+建议32
+    MAX_LEN = 256
+    BATCH_SIZE = 32
     EPOCHS = 4
-    #LEARNING_RATE = 2e-5
     LEARNING_RATE = 1.5e-5
     EPS = 1e-8
     WARMUP_RATIO = 0.1

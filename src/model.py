@@ -37,14 +37,14 @@ class FakeNewsModel(nn.Module):
         outputs = self.bert(ids, attention_mask=mask, token_type_ids=token_type_ids)
         sequence_output = outputs.last_hidden_state
 
-        # 经过 LSTM: (batch, seq_len, hidden*2)
+        # 经过 LSTM: (batch, seq_len, hidden)
         lstm_out, _ = self.lstm(sequence_output)
 
         # Attention Pooling
         # weights: (batch, seq_len, 1)
         weights = torch.softmax(self.attention(lstm_out), dim=1)
 
-        # context: (batch, hidden*2)
+        # context: (batch, hidden)
         context_vector = torch.sum(weights * lstm_out, dim=1)
 
         # Final Logits

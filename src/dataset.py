@@ -22,10 +22,10 @@ class FakeNewsDataset(Dataset):
         inputs = self.tokenizer.encode_plus(
             text,
             None,
-            add_special_tokens=True,
+            add_special_tokens=True,  # 加[CLS]和[SEP]token
             max_length=self.config.MAX_LEN,
-            padding='max_length',
-            truncation=True,
+            padding='max_length',  # 若文本过短，补齐至最大长度
+            truncation=True,  # 若文本过长，截断至最大长度
             return_token_type_ids=True
         )
 
